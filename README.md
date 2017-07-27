@@ -71,39 +71,6 @@ serverurl=unix:///tmp/supervisor.sock ; 通过 UNIX socket 连接 supervisord，
 ; 包含其他的配置文件
 [include]
 files = relative/directory/*.ini    ; 可以是 *.conf 或 *.ini
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
 [unix_http_server]
 file=/tmp/supervisor.sock   ; UNIX socket 文件，supervisorctl 会使用
 ;chmod=0700                 ; socket 文件的 mode，默认是 0700
@@ -149,16 +116,8 @@ program 配置
 
 [include]
 files = /etc/supervisor/*.conf
-1
-2
-[include]
-files = /etc/supervisor/*.conf
 假设有个用 Python 和 Flask 框架编写的用户中心系统，取名 usercenter，用 gunicorn (http://gunicorn.org/) 做 web 服务器。项目代码位于 /home/leon/projects/usercenter，gunicorn 配置文件为 gunicorn.py，WSGI callable 是 wsgi.py 里的 app 属性。所以直接在命令行启动的方式可能是这样的：
 
-cd /home/leon/projects/usercenter
-gunicorn -c gunicorn.py wsgi:app
-1
-2
 cd /home/leon/projects/usercenter
 gunicorn -c gunicorn.py wsgi:app
 现在编写一份配置文件来管理这个进程（需要注意：用 supervisord 管理时，gunicorn 的 daemon 选项需要设置为 False）：
@@ -179,22 +138,6 @@ stdout_logfile = /data/logs/usercenter_stdout.log
 
 ; 可以通过 environment 来添加需要的环境变量，一种常见的用法是修改 PYTHONPATH
 ; environment=PYTHONPATH=$PYTHONPATH:/path/to/somewhere
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
 [program:usercenter]
 directory = /home/leon/projects/usercenter ; 程序的启动目录
 command = gunicorn -c gunicorn.py wsgi:app  ; 启动命令，可以看出与手动在命令行启动的命令是一样的
@@ -217,22 +160,9 @@ stdout_logfile = /data/logs/usercenter_stdout.log
 Supervisorctl 是 supervisord 的一个命令行客户端工具，启动时需要指定与 supervisord 使用同一份配置文件，否则与 supervisord 一样按照顺序查找配置文件。
 
 supervisorctl -c /etc/supervisord.conf
-1
 supervisorctl -c /etc/supervisord.conf
 上面这个命令会进入 supervisorctl 的 shell 界面，然后可以执行不同的命令了：
 
-> status    # 查看程序状态
-> stop usercenter   # 关闭 usercenter 程序
-> start usercenter  # 启动 usercenter 程序
-> restart usercenter    # 重启 usercenter 程序
-> reread    ＃ 读取有更新（增加）的配置文件，不会启动新添加的程序
-> update    ＃ 重启配置文件修改过的程序
-1
-2
-3
-4
-5
-6
 > status    # 查看程序状态
 > stop usercenter   # 关闭 usercenter 程序
 > start usercenter  # 启动 usercenter 程序
@@ -247,20 +177,6 @@ $ supervisorctl start usercenter
 $ supervisorctl restart usercenter
 $ supervisorctl reread
 $ supervisorctl update
-1
-2
-3
-4
-5
-6
-$ supervisorctl status
-$ supervisorctl stop usercenter
-$ supervisorctl start usercenter
-$ supervisorctl restart usercenter
-$ supervisorctl reread
-$ supervisorctl update
-其它
-
 除了 supervisorctl 之外，还可以配置 supervisrod 启动 web 管理界面，这个 web 后台使用 Basic Auth 的方式进行身份认证。
 除了单个进程的控制，还可以配置 group，进行分组管理。
 经常查看日志文件，包括 supervisord 的日志和各个 pragram 的日志文件，程序 crash 或抛出异常的信息一半会输出到 stderr，可以查看相应的日志文件来查找问题。
